@@ -33,28 +33,48 @@ A modern script sharing platform built with React, TypeScript, Tailwind CSS, and
 
 ### Vercel
 1. Connect your GitHub repository to Vercel
-2. Set environment variables in Vercel dashboard
+2. **IMPORTANT**: Set environment variables in Vercel dashboard:
+   - `VITE_SUPABASE_URL` = your Supabase project URL
+   - `VITE_SUPABASE_ANON_KEY` = your Supabase anon key
 3. Deploy automatically on push
+
+**Vercel Environment Variables Setup:**
+- Go to your Vercel project dashboard
+- Navigate to Settings → Environment Variables
+- Add both variables for Production, Preview, and Development environments
 
 ### Render
 1. Connect your GitHub repository to Render
-2. Set environment variables in Render dashboard
+2. **IMPORTANT**: Set environment variables in Render dashboard:
+   - `VITE_SUPABASE_URL` = your Supabase project URL
+   - `VITE_SUPABASE_ANON_KEY` = your Supabase anon key
 3. Deploy using the included `render.yaml` configuration
 
 ### Netlify
 1. Connect your GitHub repository to Netlify
-2. Set environment variables in Netlify dashboard
+2. **IMPORTANT**: Set environment variables in Netlify dashboard:
+   - `VITE_SUPABASE_URL` = your Supabase project URL
+   - `VITE_SUPABASE_ANON_KEY` = your Supabase anon key
 3. Deploy using the included `netlify.toml` configuration
 
 ## Environment Variables
 
-Copy `.env.example` to `.env` and fill in your Supabase credentials:
+**CRITICAL**: You must set these environment variables in your hosting platform:
 
 ```env
 VITE_SUPABASE_URL=your_supabase_project_url
 VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
 ```
 
+**Where to find these values:**
+1. Go to your Supabase project dashboard
+2. Navigate to Settings → API
+3. Copy the Project URL and anon/public key
+
+**Common deployment issues:**
+- White screen = Missing environment variables
+- "supabaseUrl is required" error = Environment variables not set correctly
+- Make sure to set variables for ALL environments (Production, Preview, Development)
 ## Local Development
 
 ```bash
