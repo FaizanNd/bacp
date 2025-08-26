@@ -1,13 +1,22 @@
 import { useState, useEffect } from 'react'
-import { supabase, User } from '../lib/supabase'
+import { supabase, User, hasValidConfig } from '../lib/supabase'
 import { Session } from '@supabase/supabase-js'
 
 export const useAuth = () => {
   const [user, setUser] = useState<User | null>(null)
   const [session, setSession] = useState<Session | null>(null)
   const [loading, setLoading] = useState(true)
+  const [isGuestMode, setIsGuestMode] = useState(false)
 
   useEffect(() => {
+    // Check if we have valid Supabase configuration
+    if (!hasValidConfig || !supabase) {
+      console.log('Running in guest mode - no Supabase configuration')
+      setIsGuestMode(true)
+      setLoading(false)
+      return
+    }
+
     // Get initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session)
@@ -33,6 +42,11 @@ export const useAuth = () => {
   }, [])
 
   const fetchUserProfile = async (userId: string) => {
+    if (!hasValidConfig || !supabase) {
+      setLoading(false)
+      return
+    }
+
     try {
       console.log('Fetching user profile for:', userId)
       
@@ -65,5 +79,5 @@ export const useAuth = () => {
     }
   }
 
-  return { user, session, loading }
+  return { user, session, loading, isGuestMode }
 }

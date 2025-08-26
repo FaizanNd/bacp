@@ -8,39 +8,26 @@ import { signIn, signUp, resetPassword } from './lib/supabase'
 import { ThemeProvider } from './contexts/ThemeContext'
 
 function App() {
-  const { user, loading } = useAuth()
+  const { user, loading, isGuestMode } = useAuth()
   const [authLoading, setAuthLoading] = useState(false)
   const [authError, setAuthError] = useState('')
   const [authSuccess, setAuthSuccess] = useState('')
+  const [showGuestPrompt, setShowGuestPrompt] = useState(false)
 
   // Check for missing environment variables
   const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
   const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
 
-  if (!supabaseUrl || !supabaseAnonKey) {
-    return (
-      <ThemeProvider>
-        <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 flex items-center justify-center p-4">
-          <div className="glass backdrop-blur-md rounded-2xl p-8 shadow-2xl border border-white/20 max-w-md w-full text-center">
-            <div className="text-red-400 text-6xl mb-4">⚠️</div>
-            <h1 className="text-2xl font-bold text-white mb-4">
-              Configuration Error
-            </h1>
-            <p className="text-gray-300 mb-6">
-              Missing Supabase configuration. Please add your environment variables:
-            </p>
-            <div className="text-left bg-black/20 p-4 rounded-lg text-sm text-gray-300 font-mono">
-              <div>VITE_SUPABASE_URL={supabaseUrl ? '✓' : '❌'}</div>
-              <div>VITE_SUPABASE_ANON_KEY={supabaseAnonKey ? '✓' : '❌'}</div>
-            </div>
-            <p className="text-gray-400 text-sm mt-4">
-              Check your hosting platform's environment variables settings.
-            </p>
-          </div>
-        </div>
-      </ThemeProvider>
-    )
-  }
+  // Show guest prompt periodically
+  useEffect(() => {
+    if (isGuestMode && !showGuestPrompt) {
+      const timer = setTimeout(() => {
+        setShowGuestPrompt(true)
+      }, 30000) // Show after 30 seconds
+
+      return () => clearTimeout(timer)
+    }
+  }, [isGuestMode, showGuestPrompt])
 
   const handleAuth = async (formData: any) => {
     setAuthLoading(true)
@@ -72,15 +59,22 @@ function App() {
     window.location.reload()
   }
 
+  const handleGuestContinue = () => {
+    setShowGuestPrompt(false)
+    // Show again after 2 minutes
+    setTimeout(() => setShowGuestPrompt(true), 120000)
+  }
+
   if (loading) {
     return (
       <ThemeProvider>
-        <LoadingSpinner message="Initializing BypassAC Hub..." />
+        <LoadingSpinner message={isGuestMode ? "Loading BypassAC Hub (Guest Mode)..." : "Initializing BypassAC Hub..."} />
       </ThemeProvider>
     )
   }
 
-  if (!user) {
+  // Show auth form only if not in guest mode or if user explicitly wants to sign in
+  if (!user && !isGuestMode) {
     return (
       <ThemeProvider>
         <ErrorBoundary>
@@ -99,7 +93,14 @@ function App() {
   return (
     <ThemeProvider>
       <ErrorBoundary>
-        <Dashboard user={user} onLogout={handleLogout} />
+        <Dashboard 
+          user={user} 
+          onLogout={handleLogout} 
+          isGuestMode={isGuestMode}
+          showGuestPrompt={showGuestPrompt}
+          onGuestContinue={handleGuestContinue}
+          onGuestSignUp={() => setShowGuestPrompt(false)}
+        />
       </ErrorBoundary>
     </ThemeProvider>
   )
